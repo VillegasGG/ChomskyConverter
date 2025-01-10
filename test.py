@@ -1,7 +1,8 @@
 '''
 Testing chomsy.py step by step
 '''
-from chomsky import remove_epsilon_productions, remove_unit_productions, remove_useless_symbols
+from chomsky import remove_epsilon_productions, remove_unit_productions, \
+    remove_useless_symbols, remove_terminals
 from helper import read_input_file
 
 
@@ -90,4 +91,33 @@ def test_remove_useless_symbols():
     print('\n')
 
 test_remove_useless_symbols()
+
+# Is there any terminal in the grammar?
+def test_terminals(grammar):
+    for key in grammar:
+        # If key not start with X_
+        if not key.startswith('X_'):
+            for production in grammar[key]:
+                if production.islower():
+                    print("Terminal found")
+                    return True
+    print("No terminal found")  
+    return False
+
+# Testing step 4: Remove terminals
+def test_remove_terminals():
+    print("Testing step 4: Remove terminals")
+    grammar = read_input_file(file_name)
+    grammar = remove_epsilon_productions(grammar)
+    grammar = remove_unit_productions(grammar)
+    grammar = remove_useless_symbols(grammar)
+    grammar = remove_terminals(grammar)
+    isTerminal = test_terminals(grammar)
+    if isTerminal:
+        print("Step 4: Remove terminals failed")
+    else:
+        print("Step 4: Remove terminals passed")
+    print('\n')
+
+test_remove_terminals()
 
