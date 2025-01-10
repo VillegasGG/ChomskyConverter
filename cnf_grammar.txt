@@ -1,0 +1,8 @@
+S -> AB | BC | X_a | X_b | AX_S1
+A -> aA | X_a
+B -> AB | X_b
+C -> X_c
+X_a -> a
+X_b -> b
+X_c -> c
+X_S1 -> B | C

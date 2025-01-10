@@ -5,7 +5,6 @@ Steps to go from a CFG to a Chomsky Normal Form (CNF) grammar:
 3. Remove useless symbols
 4. Remove terminals 
 5. Remove productions with more than two non-terminals on the right-hand side
-6. Convert remaining productions to CNF
 '''
 
 from helper import read_input_file
@@ -99,3 +98,57 @@ def remove_terminals(grammar):
 
 grammar = remove_terminals(grammar)
 print(grammar)
+
+# Step 5: Remove productions with more than two non-terminals on the right-hand side
+def remove_more_than_two_non_terminals(grammar):
+    productions_to_remove = []
+    for var, prods in grammar.items():
+        for prod in prods:
+            if len([p for p in prod if p.isupper()]) > 2:
+                productions_to_remove.append((var, prod))
+    
+    for var, prod in productions_to_remove:
+        grammar[var].remove(prod)
+        # Divide the production into productions with two non-terminals
+        new_vars = []
+        for i in range(1, len(prod) - 1):
+            new_var = 'X_' + var + str(i)
+            new_vars.append(new_var)
+            grammar[new_var] = prod[i] + prod[i+1]
+
+        grammar[var].append(prod[0] + new_vars[0])
+
+    return grammar
+
+grammar = remove_more_than_two_non_terminals(grammar)
+print(grammar)
+
+def is_cnf(grammar):
+    for key, prods in grammar.items():
+        for prod in prods:
+            # Check if is a terminal
+            if len(prod) == 1 and prod.islower() and not 'X_' in key:
+                print("Terminal found: ", key, '->', prod)
+                return False
+            # Check if is a unit production
+            if len(prod) == 1 and prod.isupper() and not 'X_' in key:
+                print("Unit production found: ", key, '->', prod)
+                return False
+            # Check if is a production with more than two non-terminals
+            if len([p for p in prod if p.isupper()]) > 2 and not 'X_' in prod:
+                print("Production with more than two non-terminals found: ", key, '->', prod)
+                return False
+            
+    return True
+
+# Check if the grammar is in CNF
+result = is_cnf(grammar)
+print(result)
+
+# Save the CNF grammar to a file
+def save_cnf_grammar(grammar, file_name):
+    with open(file_name, 'w', encoding='utf-8') as file:
+        for var, prods in grammar.items():
+            file.write(var + ' -> ' + ' | '.join(prods) + '\n')
+
+save_cnf_grammar(grammar, "cnf_grammar.txt")
