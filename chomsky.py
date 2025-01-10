@@ -3,7 +3,7 @@ Steps to go from a CFG to a Chomsky Normal Form (CNF) grammar:
 1. Remove epsilon productions
 2. Remove unit productions
 3. Remove useless symbols
-4. Remove terminals from right-hand sides of productions
+4. Remove terminals 
 5. Remove productions with more than two non-terminals on the right-hand side
 6. Convert remaining productions to CNF
 '''
@@ -71,4 +71,31 @@ def remove_useless_symbols(grammar):
     return grammar
 
 grammar = remove_useless_symbols(grammar)
+print(grammar)
+
+# Step 4: Remove terminals 
+def remove_terminals(grammar):
+    terminals = []
+    for var, prods in grammar.items():
+        for prod in prods:
+            terminals += [p for p in prod if p.islower()]
+    terminals = set(terminals)
+    new_varibles = {}
+    for terminal in terminals:
+        new_varibles[terminal] = 'X_' + terminal
+    
+    # Replace terminals with new variables
+    for production in grammar.values():
+        for element in list(production):
+            if element in terminals:
+                production.remove(element)
+                production.append(new_varibles[element])
+
+    # Add new productions
+    for terminal, new_var in new_varibles.items():
+        grammar[new_var] = [terminal]
+
+    return grammar
+
+grammar = remove_terminals(grammar)
 print(grammar)
