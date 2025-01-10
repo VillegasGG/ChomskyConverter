@@ -15,7 +15,6 @@ file_name = "input.txt"
 # Step 1: Remove epsilon productions
 def remove_epsilon_productions(grammar):
     epsilon_vars = {var for var, prods in grammar.items() if 'ε' in prods}
-    print("Epsilon variables:", epsilon_vars)
     for var in epsilon_vars:
         grammar[var].remove('ε')
         # Replace all productions of the form A -> αBβ with A -> αβ for all B -> ε
@@ -40,19 +39,36 @@ def remove_unit_productions(grammar):
     unit_prods = {}
     for var, prods in grammar.items():
         unit_prods[var] = [prod for prod in prods if len(prod) == 1 and prod.isupper()]
-        print("Unit productions for", var, ":", unit_prods[var])
     
     for var, prods in unit_prods.items():
         # If prod is not empty, replace
         if prods:
-            print("Replacing unit productions for", var, ":", grammar[var])
             for element in list(grammar[var]):  # Create a copy of the list before iterating
                 if element in prods:
                     grammar[var].remove(element)
                     grammar[var] += grammar[element]
             grammar[var] = list(set(grammar[var]))
-            print("After replacing unit productions for", var, ":", grammar[var])
     return grammar
 
 grammar = remove_unit_productions(grammar)
+print(grammar)
+
+# Step 3: Remove useless symbols
+def remove_useless_symbols(grammar):
+    start_symbol = 'S'
+    reachable = set()
+    reachable.add(start_symbol)
+    old_len = 0
+    while len(reachable) != old_len:
+        old_len = len(reachable)
+        for var, prods in grammar.items():
+            for prod in prods:
+                if all([p in reachable or p.islower() for p in prod]):
+                    reachable.add(var)
+    for var in list(grammar.keys()):
+        if var not in reachable:
+            del grammar[var]
+    return grammar
+
+grammar = remove_useless_symbols(grammar)
 print(grammar)
