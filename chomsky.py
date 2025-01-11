@@ -102,25 +102,23 @@ print("Step 1: Remove epsilon productions")
 print(grammar)
 save_grammar(grammar, "after_step_1.txt")
 
-# Step 2: Remove unit productions
+# Step 2: Remove unit productions until there are no more unit productions
+def check_unit_productions(grammar):
+    for key in grammar:
+        for production in grammar[key]:
+            if len(production) == 1 and production.isupper():
+                return True
+    return False
+
 def remove_unit_productions(grammar):
-
-    # Remove productions of the form A -> A
-    for var, prods in grammar.items():
-        grammar[var] = [prod for prod in prods if prod != var]
-
-    unit_prods = {}
-    for var, prods in grammar.items():
-        unit_prods[var] = [prod for prod in prods if len(prod) == 1 and prod.isupper()]
-    
-    for var, prods in unit_prods.items():
-        # If prod is not empty, replace
-        if prods:
-            for element in list(grammar[var]):  # Create a copy of the list before iterating
-                if element in prods:
-                    grammar[var].remove(element)
-                    grammar[var] += grammar[element]
-            grammar[var] = list(set(grammar[var]))
+    is_unit = check_unit_productions(grammar)
+    while is_unit:
+        for key in grammar:
+            for production in grammar[key]:
+                if len(production) == 1 and production.isupper():
+                    grammar[key].remove(production)
+                    grammar[key] += grammar[production]
+        is_unit = check_unit_productions(grammar)
 
     return grammar
 

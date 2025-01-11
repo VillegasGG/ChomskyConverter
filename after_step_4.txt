@@ -1,0 +1,8 @@
+S_0 -> AA | ABA | bc | X_ε | AB | X_bBX_c | X_X_a | X_X_aA | BA
+S -> AA | ABA | bc | X_a | BA | X_aA | X_X_bBX_X_c | AB
+A -> X_a | X_X_aA
+B -> bc | X_X_bBX_X_c
+X_b -> b
+X_c -> c
+X_a -> a
+X_ε -> ε
