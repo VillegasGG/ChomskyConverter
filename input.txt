@@ -1,4 +1,3 @@
-S -> AB | ABC | a
+S -> ABA
 A -> aA | ε
-B -> b | AB
-C -> c
+B -> bBc | ε

@@ -1,5 +1,6 @@
 '''
 Steps to go from a CFG to a Chomsky Normal Form (CNF) grammar:
+0. Eliminate start symbol from right-hand side of productions
 1. Remove epsilon productions
 2. Remove unit productions
 3. Remove useless symbols
@@ -7,26 +8,99 @@ Steps to go from a CFG to a Chomsky Normal Form (CNF) grammar:
 5. Remove productions with more than two non-terminals on the right-hand side
 '''
 
-from helper import read_input_file
+from helper import read_input_file, save_grammar
+from itertools import combinations
 
 file_name = "input.txt"
 
-# Step 1: Remove epsilon productions
-def remove_epsilon_productions(grammar):
-    epsilon_vars = {var for var, prods in grammar.items() if 'ε' in prods}
-    for var in epsilon_vars:
-        grammar[var].remove('ε')
-        # Replace all productions of the form A -> αBβ with A -> αβ for all B -> ε
-        for v, prods in grammar.items():
-            for prod in prods:
-                if var in prod:
-                    new_prods = [prod.replace(var, '')]
-                    grammar[v] += new_prods
+# Step 0: Eliminate start symbol from right-hand side of productions
+def eliminate_start_symbol(grammar):
+    start_symbol = 'S'
+    new_start_symbol = 'S_0'
+    # Add new start symbol at the beginning of the grammar
+    grammar = {new_start_symbol: [start_symbol], **grammar}
     return grammar
 
 grammar = read_input_file(file_name)
-grammar = remove_epsilon_productions(grammar)
+grammar = eliminate_start_symbol(grammar)
+print("Step 0: Eliminate start symbol from right-hand side of productions")
 print(grammar)
+save_grammar(grammar, "after_step_0.txt")
+
+# Step 1: Remove epsilon productions
+def find_nullable_variables(grammar):
+    """
+    Find nullable variables in the grammar.
+    """
+    nullable = set()
+    for var, prods in grammar.items():
+        if 'ε' in prods:
+            nullable.add(var)
+    # Find nullable variables produced by nullable variables
+    def find_nullable(grammar, nullable):
+        new_nullable = set(nullable)
+        for var, prods in grammar.items():
+            for prod in prods:
+                if all([p in nullable or p.islower() for p in prod]):
+                    new_nullable.add(var)
+        if new_nullable == nullable:
+            return new_nullable
+        else:
+            return find_nullable(grammar, new_nullable)
+
+    return find_nullable(grammar, nullable)
+
+def remove_epsilon_productions(grammar):
+    """
+    - Generate new rule R by removing nullable variables
+    - Remove epsilon productions except for the start symbol
+    """
+    nullable = find_nullable_variables(grammar)
+    print("Nullable variables: ", nullable)
+
+    # Generate new rule R by removing nullable variables from its right side
+    new_productions = {}
+
+    # If nullable variable is in the right side of a production:
+    # - The number of  new rules is 2^(number of nullable variables)-1
+    # - Generate new rule is added if it is not already among the rules
+
+    for var, prods in grammar.items():
+        for prod in prods:
+            nullable_positions = [i for i, p in enumerate(prod) if p in nullable]
+            for i in range(1, len(nullable_positions) + 1):
+                for comb in combinations(nullable_positions, i):
+                    new_prod = list(prod)
+                    for pos in comb:
+                        new_prod[pos] = ''
+                    new_prod = ''.join(new_prod)
+                    if new_prod and new_prod not in grammar[var]:
+                        new_productions[var] = new_productions.get(var, []) + [new_prod]
+
+    # Add new rules to the grammar
+    for var, prods in new_productions.items():
+        grammar[var] += prods
+
+    # Add epsilon to the nullable variables
+    for var in nullable:
+        grammar[var].append('ε')
+
+    # Remove epsilon productions except for the start symbol
+    for var, prods in grammar.items():
+        for prod in prods:
+            if 'ε' in prod and var != 'S_0':
+                grammar[var].remove(prod)
+    
+    # Remove repeated productions
+    for var, prods in grammar.items():
+        grammar[var] = list(set(prods))
+
+    return grammar
+
+grammar = remove_epsilon_productions(grammar)
+print("Step 1: Remove epsilon productions")
+print(grammar)
+save_grammar(grammar, "after_step_1.txt")
 
 # Step 2: Remove unit productions
 def remove_unit_productions(grammar):
@@ -47,10 +121,13 @@ def remove_unit_productions(grammar):
                     grammar[var].remove(element)
                     grammar[var] += grammar[element]
             grammar[var] = list(set(grammar[var]))
+
     return grammar
 
 grammar = remove_unit_productions(grammar)
+print("Step 2: Remove unit productions")
 print(grammar)
+save_grammar(grammar, "after_step_2.txt")
 
 # Step 3: Remove useless symbols
 def remove_useless_symbols(grammar):
@@ -70,7 +147,9 @@ def remove_useless_symbols(grammar):
     return grammar
 
 grammar = remove_useless_symbols(grammar)
+print("Step 3: Remove useless symbols")
 print(grammar)
+save_grammar(grammar, "after_step_3.txt")
 
 # Step 4: Remove terminals 
 def remove_terminals(grammar):
@@ -94,34 +173,60 @@ def remove_terminals(grammar):
     for terminal, new_var in new_varibles.items():
         grammar[new_var] = [terminal]
 
+    # Remove terminals ex A->aa and add new productions
+    for var, prods in grammar.items():
+        for prod in prods:
+            if len(prod) > 1:
+                new_prods = []
+                for p in prod:
+                    if p in terminals:
+                        new_prods.append(new_varibles[p])
+                    else:
+                        new_prods.append(p)
+                grammar[var].remove(prod)
+                grammar[var].append(''.join(new_prods))
+
     return grammar
 
 grammar = remove_terminals(grammar)
+print("Step 4: Remove terminals")
 print(grammar)
+save_grammar(grammar, "after_step_4.txt")
 
 # Step 5: Remove productions with more than two non-terminals on the right-hand side
 def remove_more_than_two_non_terminals(grammar):
-    productions_to_remove = []
+    new_productions = {}
+    counter = 1  # Contador para nombres únicos
+
     for var, prods in grammar.items():
+        updated_prods = []
         for prod in prods:
+            # Divide las producciones con más de dos no terminales
             if len([p for p in prod if p.isupper()]) > 2:
-                productions_to_remove.append((var, prod))
-    
-    for var, prod in productions_to_remove:
-        grammar[var].remove(prod)
-        # Divide the production into productions with two non-terminals
-        new_vars = []
-        for i in range(1, len(prod) - 1):
-            new_var = 'X_' + var + str(i)
-            new_vars.append(new_var)
-            grammar[new_var] = prod[i] + prod[i+1]
+                current_prod = list(prod)  # Asegúrate de trabajar con una lista de caracteres
+                while len([p for p in current_prod if p.isupper()]) > 2:
+                    # Crea una nueva variable para los dos primeros no terminales
+                    new_var = f"X_{counter}"
+                    counter += 1
+                    
+                    # Reemplaza los dos primeros no terminales con la nueva variable
+                    new_productions[new_var] = [''.join(current_prod[:2])]
+                    current_prod = [new_var] + current_prod[2:]  # Actualiza la producción restante
 
-        grammar[var].append(prod[0] + new_vars[0])
+                updated_prods.append(''.join(current_prod))
+            else:
+                updated_prods.append(prod)
 
+        grammar[var] = updated_prods
+
+    # Añadir las nuevas producciones a la gramática
+    grammar.update(new_productions)
     return grammar
+
 
 grammar = remove_more_than_two_non_terminals(grammar)
 print(grammar)
+save_grammar(grammar, "after_step_5.txt")
 
 def is_cnf(grammar):
     for key, prods in grammar.items():
@@ -145,10 +250,5 @@ def is_cnf(grammar):
 result = is_cnf(grammar)
 print(result)
 
-# Save the CNF grammar to a file
-def save_cnf_grammar(grammar, file_name):
-    with open(file_name, 'w', encoding='utf-8') as file:
-        for var, prods in grammar.items():
-            file.write(var + ' -> ' + ' | '.join(prods) + '\n')
 
-save_cnf_grammar(grammar, "cnf_grammar.txt")
+save_grammar(grammar, "cnf_grammar.txt")
