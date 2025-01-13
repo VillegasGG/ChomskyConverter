@@ -1,7 +1,6 @@
-S_0 -> AB | AA | bBc | X_ε | BA | X_aA | X_X_a | X_X_bX_X_c | ABA
-A -> X_a | X_X_aA
-B -> bc | X_X_bBX_X_c
-X_a -> a
-X_ε -> ε
-X_c -> c
-X_b -> b
+S_0 -> ε | AA | BA | AB | ABA | X_bX_c | X_bBX_c | X_aA | a
+A -> X_aA | a
+B -> X_bX_c | X_bBX_c
+c -> X_c
+b -> X_b
+a -> X_a

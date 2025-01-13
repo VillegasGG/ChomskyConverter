@@ -1,4 +1,4 @@
-S_0 -> ε | BA | AB | ABA | AA | a | aA | bBc | bc
-S -> BA | AB | ABA | AA | a | aA | bBc | bc
-A -> a | aA
-B -> bBc | bc
+S_0 -> ε | AA | BA | AB | ABA | bc | bBc | aA | a
+S -> AA | BA | AB | ABA | bc | bBc | aA | a
+A -> aA | a
+B -> bc | bBc

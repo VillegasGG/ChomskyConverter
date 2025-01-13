@@ -174,39 +174,35 @@ save_grammar(grammar, "after_step_3.txt")
 
 # Step 4: Remove terminals 
 def remove_terminals(grammar):
-    terminals = []
-    for var, prods in grammar.items():
-        for prod in prods:
-            terminals += [p for p in prod if p.islower()]
-    terminals = set(terminals)
-    new_varibles = {}
-    for terminal in terminals:
-        new_varibles[terminal] = 'X_' + terminal
+    # Remove terminals from the right side of the productions length 2
+    # And replace them with a new variable
+    terminals = set()
+
+    for key in grammar:
+        for production in grammar[key]:
+            if len(production) >= 2:
+                for symbol in production:
+                    if symbol.islower():
+                        terminals.add(symbol)
     
-    # Replace terminals with new variables
-    for production in grammar.values():
-        for element in list(production):
-            if element in terminals:
-                production.remove(element)
-                production.append(new_varibles[element])
+    new_productions = {}
 
-    # Add new productions
-    for terminal, new_var in new_varibles.items():
-        grammar[new_var] = [terminal]
+    for terminal in terminals:
+        new_var = f"X_{terminal}"
+        new_productions[terminal] = [new_var]
 
-    # Remove terminals ex A->aa and add new productions
-    for var, prods in grammar.items():
-        for prod in prods:
-            if len(prod) > 1:
-                new_prods = []
-                for p in prod:
+    for key in grammar:
+        updated_prods = []
+        for production in grammar[key]:
+            if len(production) >= 2:
+                for p in production:
                     if p in terminals:
-                        new_prods.append(new_varibles[p])
-                    else:
-                        new_prods.append(p)
-                grammar[var].remove(prod)
-                grammar[var].append(''.join(new_prods))
+                        new_p = new_productions[p][0]
+                        production = production.replace(p, new_p)
+            updated_prods.append(production)
+        grammar[key] = updated_prods
 
+    grammar.update(new_productions)
     return grammar
 
 grammar = remove_terminals(grammar)

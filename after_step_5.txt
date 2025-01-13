@@ -1,21 +1,13 @@
-S_0 -> AB | AA | bBc | X_ε | BA | X_aA | X_X_a | X_5_X_c | X_6A
-A -> X_a | X_8_aA
-B -> bc | X_14_X_c
-X_a -> a
-X_ε -> ε
-X_c -> c
-X_b -> b
-X_1 -> X_
-X_2 -> X_1X
-X_3 -> X_2_
-X_4 -> X_3b
-X_5 -> X_4X
-X_6 -> AB
-X_7 -> X_
-X_8 -> X_7X
-X_9 -> X_
-X_10 -> X_9X
-X_11 -> X_10_
-X_12 -> X_11b
-X_13 -> X_12B
-X_14 -> X_13X
+S_0 -> ε | AA | BA | AB | X_1A | X_bX_c | X_4X_c | X_aA | a
+A -> X_aA | a
+B -> X_bX_c | X_7X_c
+c -> X_c
+b -> X_b
+a -> X_a
+X_1 -> AB
+X_2 -> X_
+X_3 -> X_2b
+X_4 -> X_3B
+X_5 -> X_
+X_6 -> X_5b
+X_7 -> X_6B
