@@ -128,20 +128,43 @@ print(grammar)
 save_grammar(grammar, "after_step_2.txt")
 
 # Step 3: Remove useless symbols
-def remove_useless_symbols(grammar):
-    start_symbol = 'S'
-    reachable = set()
+# If var is reacheable delete it from the vars list
+def identify_reachable_vars(grammar):
+    start_symbol = 'S_0'  # Símbolo inicial de la gramática
+    vars = set(grammar.keys())  # Conjunto de todas las variables en la gramática
+
+    reachable = set()  # Conjunto de variables alcanzables
     reachable.add(start_symbol)
-    old_len = 0
-    while len(reachable) != old_len:
-        old_len = len(reachable)
-        for var, prods in grammar.items():
-            for prod in prods:
-                if all([p in reachable or p.islower() for p in prod]):
-                    reachable.add(var)
-    for var in list(grammar.keys()):
-        if var not in reachable:
-            del grammar[var]
+
+    news = set()  # Variables nuevas por analizar
+    news.add(start_symbol)
+
+    while news:  # Mientras haya variables nuevas por analizar
+        next_news = set()  # Nuevas variables encontradas en esta iteración
+
+        for var in news:  # Iterar sobre las variables nuevas
+            for production in grammar[var]:  # Revisar producciones de la variable
+                for symbol in production:  # Analizar cada símbolo en la producción
+                    if symbol in vars and symbol not in reachable:
+                        # Si el símbolo es una variable y aún no está en 'reachable'
+                        next_news.add(symbol)
+        
+        # Actualizar los conjuntos
+        reachable.update(next_news)
+        news = next_news  # Las nuevas variables ahora son las siguientes a explorar
+
+
+    print("Variables alcanzables: ", reachable)
+    return reachable
+
+def remove_useless_symbols(grammar):
+   # Remove unreachable symbols
+    reachable = identify_reachable_vars(grammar)
+    unreachable = set(grammar.keys()) - reachable
+
+    for var in unreachable:
+        del grammar[var]
+
     return grammar
 
 grammar = remove_useless_symbols(grammar)
