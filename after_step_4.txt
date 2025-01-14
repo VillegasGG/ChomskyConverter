@@ -1,6 +1,6 @@
-S_0 -> ε | ABA | AB | AA | BA | a | DA | EC | EBC
-A -> a | DA
-B -> EC | EBC
-C -> c
-D -> a
-E -> b
+S_0 -> ε | ABA | AA | BA | AB | DE | DBE | a | CA
+A -> a | CA
+B -> DE | DBE
+C -> a
+D -> b
+E -> c

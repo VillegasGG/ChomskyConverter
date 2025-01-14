@@ -274,9 +274,6 @@ def remove_more_than_two_non_terminals(grammar):
             if new_productions[new_var] in production:
                 aux = production
                 aux = aux.replace(new_productions[new_var], new_var)
-                print("Production to replace: ", key, '->', production)
-                print("New prod var:" , new_productions[new_var])
-                print("New production: ", aux)
                 grammar[key].remove(production)
                 grammar[key].append(aux)
 

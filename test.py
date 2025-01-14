@@ -1,8 +1,7 @@
 '''
 Testing chomsy.py step by step
 '''
-from chomsky import remove_epsilon_productions, remove_unit_productions, \
-    remove_useless_symbols, remove_terminals
+from chomsky import eliminate_start_symbol, remove_epsilon_productions, remove_unit_productions, remove_useless_symbols, remove_terminals
 from helper import read_input_file
 
 
@@ -22,6 +21,7 @@ def test_epsilon_productions(grammar):
 def test_remove_epsilon_productions():
     print("\nTesting step 1: Remove epsilon productions")
     grammar = read_input_file(file_name)
+    grammar = eliminate_start_symbol(grammar)
     grammar = remove_epsilon_productions(grammar)
     isEpsilon = test_epsilon_productions(grammar)
     if isEpsilon:
@@ -46,6 +46,7 @@ def test_unit_productions(grammar):
 def test_remove_unit_productions():
     print("Testing step 2: Remove unit productions")
     grammar = read_input_file(file_name)
+    grammar = eliminate_start_symbol(grammar)
     grammar = remove_epsilon_productions(grammar)
     grammar = remove_unit_productions(grammar)
     isUnit = test_unit_productions(grammar)
@@ -59,7 +60,7 @@ test_remove_unit_productions()
 
 # is there any unreachable symbols in the grammar?
 def test_unreachable_symbols(grammar):
-    start_symbol = 'S'
+    start_symbol = 'S_0'
     reachable = set()
     reachable.add(start_symbol)
     old_len = 0
@@ -80,6 +81,7 @@ def test_unreachable_symbols(grammar):
 def test_remove_useless_symbols():
     print("Testing step 3: Remove useless symbols")
     grammar = read_input_file(file_name)
+    grammar = eliminate_start_symbol(grammar)
     grammar = remove_epsilon_productions(grammar)
     grammar = remove_unit_productions(grammar)
     grammar = remove_useless_symbols(grammar)
@@ -91,33 +93,3 @@ def test_remove_useless_symbols():
     print('\n')
 
 test_remove_useless_symbols()
-
-# Is there any terminal in the grammar?
-def test_terminals(grammar):
-    for key in grammar:
-        # If key not start with X_
-        if not key.startswith('X_'):
-            for production in grammar[key]:
-                if production.islower():
-                    print("Terminal found")
-                    return True
-    print("No terminal found")  
-    return False
-
-# Testing step 4: Remove terminals
-def test_remove_terminals():
-    print("Testing step 4: Remove terminals")
-    grammar = read_input_file(file_name)
-    grammar = remove_epsilon_productions(grammar)
-    grammar = remove_unit_productions(grammar)
-    grammar = remove_useless_symbols(grammar)
-    grammar = remove_terminals(grammar)
-    isTerminal = test_terminals(grammar)
-    if isTerminal:
-        print("Step 4: Remove terminals failed")
-    else:
-        print("Step 4: Remove terminals passed")
-    print('\n')
-
-test_remove_terminals()
-

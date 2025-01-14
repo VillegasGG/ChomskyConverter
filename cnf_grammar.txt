@@ -1,8 +1,8 @@
-S_0 -> ε | AB | AA | BA | a | DA | EC | FA | GC
-A -> a | DA
-B -> EC | GC
-C -> c
-D -> a
-E -> b
+S_0 -> ε | AA | BA | AB | DE | a | CA | GE | FA
+A -> a | CA
+B -> DE | GE
+C -> a
+D -> b
+E -> c
 F -> AB
-G -> EB
+G -> DB
