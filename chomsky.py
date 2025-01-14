@@ -153,8 +153,6 @@ def identify_reachable_vars(grammar):
         reachable.update(next_news)
         news = next_news  # Las nuevas variables ahora son las siguientes a explorar
 
-
-    print("Variables alcanzables: ", reachable)
     return reachable
 
 def remove_useless_symbols(grammar):
@@ -173,6 +171,13 @@ print(grammar)
 save_grammar(grammar, "after_step_3.txt")
 
 # Step 4: Remove terminals 
+
+def generate_new_var_name(actual_keys):
+    alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    for letter in alphabet:
+        if letter not in actual_keys:
+            return letter
+
 def remove_terminals(grammar):
     # Remove terminals from the right side of the productions length 2
     # And replace them with a new variable
@@ -187,9 +192,11 @@ def remove_terminals(grammar):
     
     new_productions = {}
 
+    actual_keys = list(grammar.keys())
     for terminal in terminals:
-        new_var = f"X_{terminal}"
+        new_var = generate_new_var_name(actual_keys)
         new_productions[terminal] = [new_var]
+        actual_keys.append(new_var)
 
     for key in grammar:
         updated_prods = []
@@ -202,7 +209,10 @@ def remove_terminals(grammar):
             updated_prods.append(production)
         grammar[key] = updated_prods
 
-    grammar.update(new_productions)
+    # Add new productions to the grammar
+    for var, prods in new_productions.items():
+        grammar[prods[0]] = [var]
+
     return grammar
 
 grammar = remove_terminals(grammar)
@@ -212,32 +222,68 @@ save_grammar(grammar, "after_step_4.txt")
 
 # Step 5: Remove productions with more than two non-terminals on the right-hand side
 def remove_more_than_two_non_terminals(grammar):
+    vars = set(grammar.keys())
+    prod_with_more_than_two_non_terminals = set()
+
+    # Find productions with more than two non-terminals
+    for key in grammar:
+        for production in grammar[key]:
+            if len([p for p in production if p in vars]) > 2:
+                prod_with_more_than_two_non_terminals.add((key, production))
+            
+    print("Productions with more than two non-terminals: ", prod_with_more_than_two_non_terminals)
+    # Generate new variables to replace the productions
+    # Split the productions into productions with two non-terminals
+    productions_to_replace = set()
+
+    for key, production in prod_with_more_than_two_non_terminals:
+        productions_to_replace.add(production)
+    
+    print("Productions to replace: ", productions_to_replace)
+
+    productions_divided = {}
+
+    #Divide the productions into productions max two non-terminals
+    for production in productions_to_replace:
+        new_vars = []
+        new_productions = []
+        for symbol in production:
+            if symbol.isupper():
+                if len(new_vars) < 2:
+                    new_vars.append(symbol)
+                else:
+                    new_productions.append(new_vars)
+                    new_vars = [symbol]
+        new_productions.append(new_vars)
+        productions_divided[production] = new_productions
+    
+    # Generate new variables to replace the productions
     new_productions = {}
-    counter = 1  # Contador para nombres únicos
 
-    for var, prods in grammar.items():
-        updated_prods = []
-        for prod in prods:
-            # Divide las producciones con más de dos no terminales
-            if len([p for p in prod if p.isupper()]) > 2:
-                current_prod = list(prod)  # Asegúrate de trabajar con una lista de caracteres
-                while len([p for p in current_prod if p.isupper()]) > 2:
-                    # Crea una nueva variable para los dos primeros no terminales
-                    new_var = f"X_{counter}"
-                    counter += 1
-                    
-                    # Reemplaza los dos primeros no terminales con la nueva variable
-                    new_productions[new_var] = [''.join(current_prod[:2])]
-                    current_prod = [new_var] + current_prod[2:]  # Actualiza la producción restante
+    actual_keys = list(grammar.keys())
+    for key, divided in productions_divided.items():
+        for div in divided:
+            if len(div) == 2:
+                new_var = generate_new_var_name(actual_keys)
+                new_productions[new_var] = ''.join(div)
+                actual_keys.append(new_var)
 
-                updated_prods.append(''.join(current_prod))
-            else:
-                updated_prods.append(prod)
+    # Replace the productions with the new variables
+    for key, production in prod_with_more_than_two_non_terminals:
+        for new_var in new_productions:
+            if new_productions[new_var] in production:
+                aux = production
+                aux = aux.replace(new_productions[new_var], new_var)
+                print("Production to replace: ", key, '->', production)
+                print("New prod var:" , new_productions[new_var])
+                print("New production: ", aux)
+                grammar[key].remove(production)
+                grammar[key].append(aux)
 
-        grammar[var] = updated_prods
+    # Add new productions to the grammar
+    for var, prod in new_productions.items():
+        grammar[var] = [prod]
 
-    # Añadir las nuevas producciones a la gramática
-    grammar.update(new_productions)
     return grammar
 
 

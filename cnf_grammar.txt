@@ -1,13 +1,8 @@
-S_0 -> ε | AA | BA | AB | X_1A | X_bX_c | X_4X_c | X_aA | a
-A -> X_aA | a
-B -> X_bX_c | X_7X_c
-c -> X_c
-b -> X_b
-a -> X_a
-X_1 -> AB
-X_2 -> X_
-X_3 -> X_2b
-X_4 -> X_3B
-X_5 -> X_
-X_6 -> X_5b
-X_7 -> X_6B
+S_0 -> ε | AB | AA | BA | a | DA | EC | FA | GC
+A -> a | DA
+B -> EC | GC
+C -> c
+D -> a
+E -> b
+F -> AB
+G -> EB
